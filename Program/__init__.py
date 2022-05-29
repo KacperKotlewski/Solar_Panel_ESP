@@ -25,4 +25,5 @@ def loop():
     print("loop")
 
 def fin():
-    print("fin")
+    for i in servos.items():
+        i.stop()

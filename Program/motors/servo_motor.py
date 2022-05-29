@@ -5,7 +5,8 @@ class Servo(Motor):
     _duty = None
     _duty_range = (0,200)
     _freq = None
-    _GPIO = None 
+    _GPIO = None
+    DEBUG = False
     
     def __init__(self, GPIO_pwm, pwm_freq=50, duty_range=(40,120)) -> None:
         super().__init__()
@@ -51,8 +52,9 @@ class Servo(Motor):
             self._duty = value
             try:
                 self._pwm.duty(self._duty)
-            except:
-                print("pwm not set")
+            except AttributeError:
+                if self.DEBUG:
+                    print("pwm not set")
         else:
             raise ValueError("Invalid duty, value must be in range of 'duty_range'")
         
@@ -99,3 +101,9 @@ class Servo(Motor):
         
     def set_duty(self, duty) -> None:
         self.duty(duty)
+
+    def stop(self) -> None:
+        self.deinit()
+
+    def deinit(self) -> None:
+        self._pwm.deinit()
