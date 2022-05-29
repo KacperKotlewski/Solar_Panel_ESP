@@ -107,3 +107,9 @@ class Servo(Motor):
 
     def deinit(self) -> None:
         self._pwm.deinit()
+
+    def step(self, step):
+        try:
+            self.duty +=step
+        except:
+            pass
