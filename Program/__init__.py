@@ -2,7 +2,7 @@ import machine
 import esp
 from machine import Pin, ADC, Timer
 import time
-from .motors import Servo
+from .motors import Servo, Stepper
 from .photoresistor import Photoresistor
 
 #GPIO
@@ -17,47 +17,47 @@ duty_ranges = {'yaw':(40,120), 'pitch':(30,80)}
 acc = 100 #accuracy of the photoresistor
 
 #objects
-servos = {}
 photo = {}
+servos = {}
 
 #func
-def step(servo, step):
-    try:
-        servo.duty +=step
-    except:
-        pass
+def calc_photo_diff(p0, p1):
+    return (p0  - p1 )//acc
+
+def move_to_light(motor, pair_of_photo, dire=1):
+    p = pair_of_photo
+    r = calc_photo_diff(photo[p[0]].read(), photo[p[1]].read())
+    motor.step(dire*r)
+    
+def servo_loop():
+    for t in (('LU', 'RU'), ('LB','RB')):
+        move_to_light(servos['yaw'],t)
+        time.sleep(0.1)
+         
+    for t in (('LU', 'LB'), ('RU','RB')):
+        move_to_light(servos['pitch'],t, -1)
+        time.sleep(0.1)
+    
+def step_loop():
+    for t in (('LU', 'RU'), ('LB','RB')):
+        move_to_light(servos['yaw'],t)
+        time.sleep(0.1)
+         
+    for t in (('LU', 'LB'), ('RU','RB')):
+        move_to_light(servos['pitch'],t, -1)
+        time.sleep(0.1)
+
 
 #program
 def setup():
-    for k,v in motors_gpio.items():
-        servos[k] = Servo(v, duty_range=duty_ranges[k])
-    
     for k,v in photo_gpio.items():
         photo[k] = Photoresistor(v)
-
-def loop():            
-    #yaw
-    for t in (('LU', 'RU'), ('LB','RB')):
-        p0 = photo[t[0]].read()
-        p1 = photo[t[1]].read()
-        r = (p0  - p1 )//acc
-        if r < 0:
-            servos['yaw'].step(-1)
-        elif r > 0:
-            servos['yaw'].step(1)
-        time.sleep(0.1)
-         
-    #pitch
-    for t in (('LU', 'LB'), ('RU','RB')):
-        p0 = photo[t[0]].read()
-        p1 = photo[t[1]].read()
-        r = (p0  - p1 )//acc
-        if r > 0:
-            servos['pitch'].step(-1)
-        elif r < 0:
-            servos['pitch'].step(1)
-        time.sleep(0.1)
         
+    for k,v in motors_gpio.items():
+        servos[k] = Servo(v, duty_range=duty_ranges[k])
+
+def loop():
+    servo_loop()
     #return 1
 
 def fin():
