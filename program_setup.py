@@ -9,7 +9,8 @@ def load_program():
     if "setup" in d:
         Program.setup()
     if "loop" in d:
-        Program.loop()
+        while Program.loop() != 1:
+            pass
     if "fin" in d:
         Program.fin()
 

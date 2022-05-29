@@ -1,5 +1,5 @@
 from . import Motor
-from machine import Pin, ADC, PWM
+from machine import Pin, PWM
 
 class Servo(Motor):
     _duty = None
