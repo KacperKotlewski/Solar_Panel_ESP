@@ -2,7 +2,7 @@ import machine
 import esp
 from machine import Pin, ADC, Timer
 import time
-import motors
+from .motors import Servo
 
 #GPIO
 photo_gpio = (34,35,32,33)
@@ -17,8 +17,8 @@ servos = {}
 
 def setup():
     servos = {
-        'yaw':motors.Servo(motors_gpio['yaw'], duty_range=duty_ranges['yaw']), 
-        'pitch':motors.Servo(motors_gpio['pitch'], duty_range=duty_ranges['pitch'])
+        'yaw':Servo(motors_gpio['yaw'], duty_range=duty_ranges['yaw']), 
+        'pitch':Servo(motors_gpio['pitch'], duty_range=duty_ranges['pitch'])
         }
 
 def loop():
