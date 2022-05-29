@@ -11,6 +11,8 @@ photo_gpio = { "RU":35, "LU":34,
                "RB":32, "LB":33 }
 setup_btn_gpio = 25
 motors_gpio = {'yaw':12, 'pitch':13} #yaw is rotate left and right, pitch is up and down
+motors_step_gpio = {'yaw':(22,1), 'pitch':(3,21)} #yaw is rotate left and right, pitch is up and down
+stepers_enable = 23
 
 #varibles
 duty_ranges = {'yaw':(40,120), 'pitch':(30,80)}
@@ -19,6 +21,8 @@ acc = 100 #accuracy of the photoresistor
 #objects
 photo = {}
 servos = {}
+steps = {}
+steppers_en = None
 
 #func
 def calc_photo_diff(p0, p1):
@@ -37,15 +41,22 @@ def servo_loop():
     for t in (('LU', 'LB'), ('RU','RB')):
         move_to_light(servos['pitch'],t, -1)
         time.sleep(0.1)
+        
+        
+def is_step_free(step):
+    step.update()
+    return not step.is_busy()
     
 def step_loop():
-    for t in (('LU', 'RU'), ('LB','RB')):
-        move_to_light(servos['yaw'],t)
-        time.sleep(0.1)
+    s = steps['yaw']
+    if is_step_free(s):
+        for t in (('LU', 'RU'), ('LB','RB')):
+            move_to_light(s,t)
          
-    for t in (('LU', 'LB'), ('RU','RB')):
-        move_to_light(servos['pitch'],t, -1)
-        time.sleep(0.1)
+    s = steps['pitch']
+    if is_step_free(s):
+        for t in (('LU', 'RU'), ('LB','RB')):
+            move_to_light(s,t)
 
 
 #program
@@ -55,6 +66,14 @@ def setup():
         
     for k,v in motors_gpio.items():
         servos[k] = Servo(v, duty_range=duty_ranges[k])
+        
+    for k,v in motors_step_gpio.items():
+        steps[k] = Stepper(v[0], v[1])
+    
+    
+    global steppers_en
+    steppers_en = Pin(stepers_enable, mode=Pin.OUT)
+    steppers_en.value(0)
 
 def loop():
     servo_loop()
