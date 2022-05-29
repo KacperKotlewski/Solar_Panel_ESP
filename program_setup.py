@@ -14,10 +14,10 @@ def load_program():
         Program.fin()
 
 def init_program():
-    if "Program.py" in os.listdir():
+    if "Program.py" in os.listdir() or "Program" in os.listdir():
         load_program()
     else:
-        print("There is no 'program.py' in here, sorry")
+        raise Exception("There is no 'Program.py' or 'Program' module in here, sorry")
         
         
 init_program()
