@@ -12,13 +12,12 @@ class env:
             with open(file, "r") as f:
                 for line in f:
                     line = line.strip()
-                    line = line.split("#")[0]
-                    line = line.strip()
-                    line = line.split("=")
-                    if line.length == 2:
-                        self.env_dict[line[0]] = line[1]
-                    if line.length > 2:
-                        self.env_dict[line[0]] = str.join("=", line[1:])
+                    if line != "#":
+                        line = line.split("=")
+                        if line.length == 2:
+                            self.env_dict[line[0]] = line[1]
+                        if line.length > 2:
+                            self.env_dict[line[0]] = str.join("=", line[1:])
         else:
             raise 
                         
