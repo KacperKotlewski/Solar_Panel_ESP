@@ -16,14 +16,23 @@ duty_ranges = {'yaw':(40,120), 'pitch':(30,80)}
 servos = {}
 
 def setup():
+    global servos
     servos = {
         'yaw':Servo(motors_gpio['yaw'], duty_range=duty_ranges['yaw']), 
         'pitch':Servo(motors_gpio['pitch'], duty_range=duty_ranges['pitch'])
         }
 
 def loop():
-    print("loop")
+    for i in range(100):
+        for k,i in servos.items():
+            try:
+                i.duty +=1
+            except:
+                pass
+            
+        time.sleep(0.1)
 
 def fin():
-    for i in servos.items():
+    for k,i in servos.items():
         i.stop()
+
