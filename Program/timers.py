@@ -40,6 +40,8 @@ class Timer:
             self.start()
         
     def start(self):
+        if self._last_time == 0:
+            self._last_time = time.ticks_ms()
         self._start_time = time.ticks_ms()
     
     def stop(self):
