@@ -4,6 +4,8 @@ from machine import Pin, ADC, Timer
 import time
 from .motors import Servo, Stepper
 from .photoresistor import Photoresistor
+from .button import Button, Better_Button
+from .event import Event
 
 #GPIO
 #photo_gpio = (34,35,32,33)
@@ -22,9 +24,23 @@ acc = 100 #accuracy of the photoresistor
 photo = {}
 servos = {}
 steps = {}
-steppers_en = None
+steppers_en = Pin(stepers_enable, mode=Pin.OUT)
+btn = Better_Button(setup_btn_gpio)
+
+#event callbacks
+def callback(*args):
+    print("dummy callback")
+
+def double_click():
+    print("double click")
+    
+def long_press():
+    print("long press")
+
+#eventy
 
 #func
+    
 def calc_photo_diff(p0, p1):
     return (p0  - p1 )//acc
 
@@ -69,18 +85,24 @@ def setup():
         
     for k,v in motors_step_gpio.items():
         steps[k] = Stepper(v[0], v[1])
+        
     
-    
-    global steppers_en
-    steppers_en = Pin(stepers_enable, mode=Pin.OUT)
     steppers_en.value(0)
+    btn.add_on_press(2, Event(callback=callback))
+    btn.add_on_relase(2, Event(callback=callback))
+    btn.add_on_series(2, Event(callback=double_click))
+    btn.add_on_long_press(3, Event(callback=long_press))
+     
 
 def loop():
-    servo_loop()
+    print("loop")
+    #servo_loop()
     #return 1
+    btn.check()
+    
+    #pass
+    
 
 def fin():
     for k,i in servos.items():
         i.stop()
-
-
