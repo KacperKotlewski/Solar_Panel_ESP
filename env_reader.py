@@ -17,7 +17,7 @@ class Env_reader:
                         if len(line) == 2:
                             self.env_dict[line[0].upper()] = line[1]
                         if len(line) > 2:
-                            self.env_dict[line[0].upper()] = str.join("=", line[1:])
+                            self.env_dict[line[0].upper().strip()] = str.join("=", line[1:]).strip()
         else:
             raise 
                         
