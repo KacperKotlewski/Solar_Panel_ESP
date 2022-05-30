@@ -21,6 +21,7 @@ stepers_enable = 23
 #varibles
 duty_ranges = {'yaw':(40,120), 'pitch':(30,80)}
 acc = 100 #accuracy of the photoresistor
+finish_flag = False
 
 #objects
 photo = {}
@@ -32,6 +33,10 @@ btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
 #event callbacks
 def callback(*args):
     print("dummy callback", *args)
+    
+def close(*args):
+    global finish_flag
+    finish_flag = True
 
 #eventy
 
@@ -76,29 +81,30 @@ def setup():
     for k,v in photo_gpio.items():
         photo[k] = Photoresistor(v)
         
-    #for k,v in motors_gpio.items():
-        #servos[k] = Servo(v, duty_range=duty_ranges[k])
+    for k,v in motors_gpio.items():
+        servos[k] = Servo(v, duty_range=duty_ranges[k])
         
     #for k,v in motors_step_gpio.items():
         #steps[k] = Stepper(v[0], v[1])
         
     
     #steppers_en.value(0)
-    btn.add_on_press(Event(callback, "press"))
-    btn.add_on_relase(Event(callback, "relase"))
-    btn.add_on_series(2, Event(callback, "double click"))
-    btn.add_after_long_press(3, Event(callback, "3 sec click"))
+    #btn.add_on_press(Event(callback, "press"))
+    #btn.add_on_relase(Event(callback, "relase"))
+    #btn.add_on_series(2, Event(callback, "double click"))
+    btn.add_after_long_press(5, Event(close))
      
 
 def loop():
     dprint("loop")
     btn.check()
-    #print(btn._btn.value())
-    #servo_loop()
-    #return 1
+    
+    servo_loop()
+    
     if DEBUG:
         time.sleep(0.3)
-    #pass
+    if finish_flag:
+        return 1
     
 
 def fin():
