@@ -49,6 +49,7 @@ class Button:
             dprint(type(self),self,"pressed")
             self._if_is_pressed()
             if last[0] != types["pressed"]:
+                dprint(type(self),self,"First press signal")
                 self._on_press()
                 self.events.trigger_event("on_press")
                 self._add_last_action(types["pressed"])
@@ -56,6 +57,7 @@ class Button:
             dprint(type(self),self,"released")
             self._if_is_released()
             if last[0] != types["released"]:
+                dprint(type(self),self,"First release signal")
                 self._on_relase()
                 self.events.trigger_event("on_release")
                 self._add_last_action(types["released"])
@@ -63,9 +65,9 @@ class Button:
                 
     def time_of_pressing(self):
         if self.is_pressed():
-            return self.__press_timer.get_time()
+            return self.press_timer.get_time()
         else:
-            return Time_calculations(time.ticks_diff(self.__press_timer._start_time, self.__relase_timer._start_time))
+            return Time_calculations(time.ticks_diff(self.press_timer._start_time, self.relase_timer._start_time))
         
     def time_between_pressing(self):
         return self.press_timer.get_time()
@@ -119,10 +121,15 @@ class Better_Button(Button):
         self.events.trigger_event("on_series"+str(self._series_click_counter+1))
         
     def add_on_long_press(self, time_of_press_in_sec, event:Event):
-        def on_long_press(btn:Button, time_of_press:float, event:Event):
-            if btn.time_of_press().sec() > time_of_press:
-                event()
-        event = Event(on_long_press, self, time_of_press_in_sec, event)
+        event_flag = [True]
+        def on_long_press(btn:Button, time_of_press:float, event:Event, flag:list=list(tuple([True]))):
+            if btn.time_of_pressing().sec() > time_of_press_in_sec:
+                if flag[0]:
+                    flag[0] = False
+                    event()
+            else:
+                flag[0] = True
+        event = Event(on_long_press, self, time_of_press_in_sec, event, event_flag)
         self.events.add_event("on_long_press", event)
         
     def _on_long_press(self):
