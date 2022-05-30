@@ -1,11 +1,11 @@
 class Event:
-    def __init__(self, callback=None, name=None, args=None):
-        self.name = name
+    def __init__(self, callback, *args):
+        self.name = None
         self.callback = callback
         self.args = args
         
     def __call__(self):
-        self.callback(self.args)
+        self.callback(*self.args)
         
     def __str__(self):
         return self.name +"_"+ str(self.callback)
