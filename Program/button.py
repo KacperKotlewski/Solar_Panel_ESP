@@ -5,6 +5,8 @@ from .timers import Timer, Time_calculations
 from .util import dprint
 from .settings import time_between_multi_presses, time_from_last_relase
 
+print(time_between_multi_presses, time_from_last_relase)
+
 class Button:
     def __init__(self, pin, pull = Pin.PULL_DOWN):
         self._btn = Pin(pin, Pin.IN, pull)
@@ -93,7 +95,6 @@ class Better_Button(Button):
         return self._series_end_flag
         
     def _click_series(self):
-        print(self.relase_timer.get_time().sec() < time_from_last_relase, self.time_between_pressing().sec() < 1)
         if self.relase_timer.get_time().sec() < time_from_last_relase:
             if self.time_between_pressing().sec() < time_between_multi_presses:
                 if self._series_end_flag:
@@ -101,7 +102,7 @@ class Better_Button(Button):
                 self._series_click_counter += 1
         else:
             self._series_click_counter = 1
-        print(self._series_click_counter, self._series_end_flag)
+        dprint(type(self),self,"count of click (",self._series_click_counter, "), end_flag (", self._series_end_flag,")")
                 
     def _reset_flag(self):
         if self.relase_timer.get_time().sec() > time_from_last_relase:
