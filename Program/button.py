@@ -5,8 +5,6 @@ from .timers import Timer, Time_calculations
 from .util import dprint
 from .settings import time_between_multi_presses, time_from_last_relase
 
-print(time_between_multi_presses, time_from_last_relase)
-
 class Button:
     def __init__(self, pin, pull = Pin.PULL_DOWN):
         self._btn = Pin(pin, Pin.IN, pull)
