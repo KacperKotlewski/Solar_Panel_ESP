@@ -1,6 +1,6 @@
 import os
 
-class env:
+class Env_reader:
     def __init__(self, file_to_open=".env"):
         self.file_to_open = file_to_open
         self.env_dict = {}
@@ -14,18 +14,18 @@ class env:
                     line = line.strip()
                     if line != "#":
                         line = line.split("=")
-                        if line.length == 2:
-                            self.env_dict[line[0]] = line[1]
-                        if line.length > 2:
-                            self.env_dict[line[0]] = str.join("=", line[1:])
+                        if len(line) == 2:
+                            self.env_dict[line[0].upper()] = line[1]
+                        if len(line) > 2:
+                            self.env_dict[line[0].upper()] = str.join("=", line[1:])
         else:
             raise 
                         
     def get(self, key):
-        return self.env_dict[key]
+        return self.env_dict[key.upper()]
     
     def set(self, key, value):
-        self.env_dict[key] = value
+        self.env_dict[key.upper()] = value
         
     def save_env(self):
         file = self.file_to_open
