@@ -21,8 +21,13 @@ class Env_reader:
         else:
             raise 
                         
-    def get(self, key):
-        return self.env_dict[key.upper()]
+    def get(self, key, default=None):
+        if key.upper() in self.get_keys():
+            return self.env_dict[key.upper()]
+        elif default is not None:
+            return default
+        else:
+            raise ValueError("there is no " + key + " in env")
     
     def set(self, key, value):
         self.env_dict[key.upper()] = value
