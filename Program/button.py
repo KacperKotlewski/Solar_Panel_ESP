@@ -3,6 +3,7 @@ import time
 from .event import EventManager, Event
 from .timers import Timer, Time_calculations
 from .util import dprint
+from .settings import time_between_multi_presses, time_from_last_relase
 
 class Button:
     def __init__(self, pin, pull = Pin.PULL_DOWN):
@@ -14,7 +15,7 @@ class Button:
         self.events = EventManager()
         
         self._type_of_action = {"inactive": 0, "pressed": 1, "released": 2}
-        self._last_actions = [0, 0, 0]
+        self._last_actions = [2,2,2]
         
     def is_pressed(self):
         return self._btn.value() == self._press_value
@@ -47,27 +48,27 @@ class Button:
         dprint(type(self),self,"check", is_p)
         if is_p:
             dprint(type(self),self,"pressed")
-            self._if_is_pressed()
             if last[0] != types["pressed"]:
                 dprint(type(self),self,"First press signal")
                 self._on_press()
                 self.events.trigger_event("on_press")
                 self._add_last_action(types["pressed"])
+            self._if_is_pressed()
         else:
             dprint(type(self),self,"released")
-            self._if_is_released()
             if last[0] != types["released"]:
                 dprint(type(self),self,"First release signal")
                 self._on_relase()
                 self.events.trigger_event("on_release")
                 self._add_last_action(types["released"])
+            self._if_is_released()
                 
                 
     def time_of_pressing(self):
         if self.is_pressed():
             return self.press_timer.get_time()
         else:
-            return Time_calculations(time.ticks_diff(self.press_timer._start_time, self.relase_timer._start_time))
+            return Time_calculations(abs(time.ticks_diff(self.press_timer._start_time, self.relase_timer._start_time)))
         
     def time_between_pressing(self):
         return self.press_timer.get_time()
@@ -87,50 +88,70 @@ class Better_Button(Button):
         
     def get_series(self):
         return self._series_click_counter, self._series_end_flag
+    
+    def is_series_still_running(self):
+        return self._series_end_flag
         
     def _click_series(self):
-        if self.relase_timer.get_time().sec() < 0.5:
-            if self.time_between_pressing().sec() < 1:
+        print(self.relase_timer.get_time().sec() < time_from_last_relase, self.time_between_pressing().sec() < 1)
+        if self.relase_timer.get_time().sec() < time_from_last_relase:
+            if self.time_between_pressing().sec() < time_between_multi_presses:
                 if self._series_end_flag:
-                    self._series_click_counter = 0
                     self._series_end_flag = False
                 self._series_click_counter += 1
+        else:
+            self._series_click_counter = 1
+        print(self._series_click_counter, self._series_end_flag)
                 
     def _reset_flag(self):
-        if self.relase_timer.get_time().sec() > 0.5:
-            if self.time_between_pressing().sec() > 1:
+        if self.relase_timer.get_time().sec() > time_from_last_relase:
+            if self.time_between_pressing().sec() > time_between_multi_presses:
                 self._on_series()
                 self._series_end_flag = True
                 
     def _if_is_released(self):
         super()._if_is_released()
         self._reset_flag()
+        self._on_series()
         
     def _on_press(self):
         super()._on_press()
         self._click_series()
+        self._on_series()
         
     def _if_is_pressed(self):
         super()._if_is_pressed()
-        self._on_long_press()
+        #self._on_long_press()
+        self._on_series()
+           
+    def _on_relase(self):
+        super()._on_relase()
+        self._after_long_press()
         
     def add_on_series(self, count_of_click, event):
-        self.events.add_event("on_series"+str(count_of_click), event)
+        def on_long_press(btn:Button, count_of_click:int, event:Event, flag:list=list(tuple([True]))):
+            if btn._series_click_counter == count_of_click and btn.is_series_still_running():
+                if flag[0]:
+                    flag[0] = False
+                    event()
+            else:
+                flag[0] = True
+        event = Event(on_long_press, self, count_of_click, event)
+        self.events.add_event("on_series", event)
         
     def _on_series(self):
-        self.events.trigger_event("on_series"+str(self._series_click_counter+1))
+        self.events.trigger_event("on_series")
         
-    def add_on_long_press(self, time_of_press_in_sec, event:Event):
-        event_flag = [True]
-        def on_long_press(btn:Button, time_of_press:float, event:Event, flag:list=list(tuple([True]))):
+    def add_after_long_press(self, time_of_press_in_sec, event:Event):
+        def after_long_press(btn:Button, time_of_press:float, event:Event, flag:list=list(tuple([True]))):
             if btn.time_of_pressing().sec() > time_of_press_in_sec:
                 if flag[0]:
                     flag[0] = False
                     event()
             else:
                 flag[0] = True
-        event = Event(on_long_press, self, time_of_press_in_sec, event, event_flag)
-        self.events.add_event("on_long_press", event)
+        event = Event(after_long_press, self, time_of_press_in_sec, event)
+        self.events.add_event("after_long_press", event)
         
-    def _on_long_press(self):
-        self.events.trigger_event("on_long_press")
+    def _after_long_press(self):
+        self.events.trigger_event("after_long_press")
