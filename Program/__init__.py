@@ -87,7 +87,7 @@ def setup():
     btn.add_on_press(Event(callback, "press"))
     btn.add_on_relase(Event(callback, "relase"))
     btn.add_on_series(2, Event(callback, "double click"))
-    btn.add_on_long_press(3, Event(callback, "3 sec click"))
+    btn.add_after_long_press(3, Event(callback, "3 sec click"))
      
 
 def loop():
