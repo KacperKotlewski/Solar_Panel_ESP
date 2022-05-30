@@ -1,4 +1,4 @@
 from .settings import DEBUG
 def dprint(*args):
-    if DEBUG:
+    if bool(DEBUG):
         print(*args)
