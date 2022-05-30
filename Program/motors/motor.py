@@ -14,3 +14,9 @@ class Motor:
     
     def stop(self) -> None:
         pass
+    
+    def update(self) -> None:
+        pass
+    
+    def is_busy(self) -> bool:
+        return False
