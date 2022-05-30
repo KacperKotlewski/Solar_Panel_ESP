@@ -6,6 +6,8 @@ from .motors import Servo, Stepper
 from .photoresistor import Photoresistor
 from .button import Button, Better_Button
 from .event import Event
+from .util import dprint
+from .settings import DEBUG
 
 #GPIO
 #photo_gpio = (34,35,32,33)
@@ -25,17 +27,11 @@ photo = {}
 servos = {}
 steps = {}
 steppers_en = Pin(stepers_enable, mode=Pin.OUT)
-btn = Better_Button(setup_btn_gpio)
+btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
 
 #event callbacks
 def callback(*args):
-    print("dummy callback")
-
-def double_click():
-    print("double click")
-    
-def long_press():
-    print("long press")
+    print("dummy callback", *args)
 
 #eventy
 
@@ -80,29 +76,32 @@ def setup():
     for k,v in photo_gpio.items():
         photo[k] = Photoresistor(v)
         
-    for k,v in motors_gpio.items():
-        servos[k] = Servo(v, duty_range=duty_ranges[k])
+    #for k,v in motors_gpio.items():
+        #servos[k] = Servo(v, duty_range=duty_ranges[k])
         
-    for k,v in motors_step_gpio.items():
-        steps[k] = Stepper(v[0], v[1])
+    #for k,v in motors_step_gpio.items():
+        #steps[k] = Stepper(v[0], v[1])
         
     
-    steppers_en.value(0)
-    btn.add_on_press(2, Event(callback=callback))
-    btn.add_on_relase(2, Event(callback=callback))
-    btn.add_on_series(2, Event(callback=double_click))
-    btn.add_on_long_press(3, Event(callback=long_press))
+    #steppers_en.value(0)
+    btn.add_on_press(Event(callback, "press"))
+    btn.add_on_relase(Event(callback, "relase"))
+    btn.add_on_series(2, Event(callback, "double click"))
+    btn.add_on_long_press(3, Event(callback, "3 sec click"))
      
 
 def loop():
-    print("loop")
+    dprint("loop")
+    btn.check()
+    #print(btn._btn.value())
     #servo_loop()
     #return 1
-    btn.check()
-    
+    if DEBUG:
+        time.sleep(0.3)
     #pass
     
 
 def fin():
     for k,i in servos.items():
         i.stop()
+
