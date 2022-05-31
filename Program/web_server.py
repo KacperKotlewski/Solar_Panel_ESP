@@ -1,7 +1,7 @@
 from .settings import ssid, passwd
 import network
 import uasyncio
-from src.microdot_asyncio import Microdot
+from microdot_asyncio import Microdot
 
 
 def scan():

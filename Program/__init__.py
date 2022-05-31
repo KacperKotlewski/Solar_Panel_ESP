@@ -8,6 +8,7 @@ from .button import Button, Better_Button
 from .event import Event
 from .util import dprint
 from .settings import DEBUG
+from .web_server import *
 
 #GPIO
 #photo_gpio = (34,35,32,33)
@@ -109,13 +110,16 @@ def setup():
     #btn.add_on_series(2, Event(callback, "double click"))
     btn.add_on_series(2, Event(switch_move_flag))
     btn.add_after_long_press(5, Event(close))
+    
+    start_server()
      
 last_dir = -1
 def loop():
     dprint("loop")
     btn.check()
     
-    motor_loop()
+    #motor_loop()
+    
     
     if DEBUG:
         time.sleep(0.2)
