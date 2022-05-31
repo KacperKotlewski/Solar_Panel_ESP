@@ -16,7 +16,7 @@ photo_gpio = { "RU":35, "LU":34,
 setup_btn_gpio = 25
 motor_gpio = None #you can define it here or below, it depent from you
 motors_servo_gpio = {'yaw':12, 'pitch':13} #yaw is rotate left and right, pitch is up and down
-motors_step_gpio = {'yaw':(21,19), 'pitch':(3,21)} #yaw is rotate left and right, pitch is up and down
+motors_step_gpio = {'yaw':(21,19), 'pitch':(18,5)} #yaw is rotate left and right, pitch is up and down
 stepers_enable = 23
 
 #varibles
@@ -94,7 +94,7 @@ def setup():
         if motor_gpio is None:
             motor_gpio = motors_step_gpio
         for k,v in motor_gpio.items():
-            motors[k] = Stepper(v[0], v[1], speed_in_Hz=500)
+            motors[k] = Stepper(v[0], v[1], speed_in_Hz=1000)
         
     elif motor_type == types_of_motor[1]:
         if motor_gpio is None:
@@ -114,24 +114,8 @@ last_dir = -1
 def loop():
     dprint("loop")
     btn.check()
-    s =motors['yaw']
-    if s.is_busy():
-        s.update()
-    else:
-        dprint("-"*100)
-        dprint("change dir")
-        dprint("-"*100)
-        global last_dir
-        last_dir *= -1
-        motors['yaw'].step(last_dir*1000)
-        
     
-    if stepper_move_flag and motor_type == types_of_motor[0]:
-        steppers_en.value(0)
-    else:
-        steppers_en.value(1)
-    
-    #motor_loop()
+    motor_loop()
     
     if DEBUG:
         time.sleep(0.2)
