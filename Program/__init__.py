@@ -79,7 +79,7 @@ def motor_loop():
 
 #program
 def setup():
-    if True:
+    if DEBUG:
         for i in range(100):
             print("")
         print("-"*100)
@@ -94,7 +94,7 @@ def setup():
         if motor_gpio is None:
             motor_gpio = motors_step_gpio
         for k,v in motor_gpio.items():
-            motors[k] = Stepper(v[0], v[1], speed_in_Hz=1)
+            motors[k] = Stepper(v[0], v[1], speed_in_Hz=500)
         
     elif motor_type == types_of_motor[1]:
         if motor_gpio is None:
@@ -118,12 +118,12 @@ def loop():
     if s.is_busy():
         s.update()
     else:
-        print("-"*100)
-        print("change dir")
-        print("-"*100)
+        dprint("-"*100)
+        dprint("change dir")
+        dprint("-"*100)
         global last_dir
         last_dir *= -1
-        motors['yaw'].step(last_dir*10)
+        motors['yaw'].step(last_dir*1000)
         
     
     if stepper_move_flag and motor_type == types_of_motor[0]:
