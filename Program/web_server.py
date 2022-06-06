@@ -25,12 +25,14 @@ app = Microdot()
 def start_server():
     print("start server")
     connect()
-    try:
-        app.run(port=80)
-    except Exception as e:
-        app.shutdown()
-        raise Exception(e)
-    
+        
 @app.route('/')
-def index(request):
+async def index(request):
     return "Hello World"
+
+
+@app.route('/shutdown')
+async def shutdown(request):
+    request.app.shutdown()
+    return 'The server is shutting down...'
+

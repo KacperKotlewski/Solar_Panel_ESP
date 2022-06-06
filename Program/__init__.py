@@ -8,17 +8,19 @@ from .button import Button, Better_Button
 from .event import Event
 from .util import dprint
 from .settings import DEBUG
-from .web_server import *
+#from .web_server import *
 
 #GPIO
 #photo_gpio = (34,35,32,33)
 photo_gpio = { "RU":35, "LU":34,
-               "RB":32, "LB":33 }
+               "RB":33, "LB":32 }
 setup_btn_gpio = 25
 motor_gpio = None #you can define it here or below, it depent from you
 motors_servo_gpio = {'yaw':12, 'pitch':13} #yaw is rotate left and right, pitch is up and down
 motors_step_gpio = {'yaw':(21,19), 'pitch':(18,5)} #yaw is rotate left and right, pitch is up and down
 stepers_enable = 23
+
+stops = (12,14,27,26)
 
 #varibles
 duty_ranges = {'yaw':(40,120), 'pitch':(30,80)} #for servos
@@ -35,6 +37,7 @@ photo = {}
 motors = {}
 
 btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
+stoppers = (Button(pin=pin, pull = Pin.PULL_DOWN) for pin in stops)
 
 if motor_type == types_of_motor[0]:
     steppers_en = Pin(stepers_enable, mode=Pin.OUT)
@@ -43,7 +46,7 @@ if motor_type == types_of_motor[0]:
 def callback(*args):
     print("dummy callback", *args)
     
-def close(*args):
+def close():
     global finish_flag
     finish_flag = True
     
@@ -72,7 +75,7 @@ def move_motor_by_photo(motor, photoresistor_setup=(('LU', 'RU'), ('LB','RB')), 
         motor.update()
             
 def motor_loop():
-    move_motor_by_photo(motors['yaw'],   (('LU', 'RU'), ('LB','RB')), direction=1)
+    move_motor_by_photo(motors['yaw'],   (('LU', 'RU'), ('LB','RB')), direction=-1)
     move_motor_by_photo(motors['pitch'], (('LU', 'LB'), ('RU','RB')), direction=-1)
     if motor_type == types_of_motor[1]:
         time.sleep(0.1)
@@ -95,7 +98,7 @@ def setup():
         if motor_gpio is None:
             motor_gpio = motors_step_gpio
         for k,v in motor_gpio.items():
-            motors[k] = Stepper(v[0], v[1], speed_in_Hz=1000)
+            motors[k] = Stepper(v[0], v[1], speed_in_Hz=500)
         
     elif motor_type == types_of_motor[1]:
         if motor_gpio is None:
@@ -110,15 +113,17 @@ def setup():
     #btn.add_on_series(2, Event(callback, "double click"))
     btn.add_on_series(2, Event(switch_move_flag))
     btn.add_after_long_press(5, Event(close))
+    for b in stoppers:
+        b.add_on_press(Event(close))
     
-    start_server()
+    #start_server()
      
 last_dir = -1
 def loop():
     dprint("loop")
     btn.check()
     
-    #motor_loop()
+    motor_loop()
     
     
     if DEBUG:
@@ -137,4 +142,5 @@ def fin():
             i.stop()
         if any(true_table):
             true_table = [m.is_busy() for m in mot] + [False]
+
 
