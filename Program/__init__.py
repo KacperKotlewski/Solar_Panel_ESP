@@ -8,6 +8,7 @@ from .button import Button, Better_Button
 from .event import Event
 from .util import dprint
 from .settings import DEBUG
+import uasincio 
 #from .web_server import *
 
 #GPIO
@@ -35,6 +36,7 @@ motor_type = types_of_motor[0]
 #objects
 photo = {}
 motors = {}
+timers = {}}
 
 btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
 stoppers = (Button(pin=pin, pull = Pin.PULL_DOWN) for pin in stops)
@@ -49,11 +51,13 @@ def callback(*args):
 def close():
     global finish_flag
     finish_flag = True
-    
-def switch_move_flag():
-    global stepper_move_flag
-    stepper_move_flag = not stepper_move_flag
-    print("switch_move_flag flag now is", stepper_move_flag)
+
+def motor_on_after_period():
+    turn_on_motors()
+    timers['motors_sleep'].deinit()
+    timers['motors_sleep'] = None
+
+
 
 #eventy
 
@@ -68,17 +72,41 @@ def move_to_light(motor, pair_of_photo, dire=1):
     motor.step(dire*r)
 
 def move_motor_by_photo(motor, photoresistor_setup=(('LU', 'RU'), ('LB','RB')), direction=1):
-    if not motor.is_busy():
-        for t in photoresistor_setup:
-            move_to_light(motor, t, direction)
-    else:
+    if motor.is_busy():
         motor.update()
+        return
+    for t in photoresistor_setup:
+        move_to_light(motor, t, direction)
             
 def motor_loop():
+    if stepper_move_flag == False:
+        return
     move_motor_by_photo(motors['yaw'],   (('LU', 'RU'), ('LB','RB')), direction=-1)
     move_motor_by_photo(motors['pitch'], (('LU', 'LB'), ('RU','RB')), direction=-1)
     if motor_type == types_of_motor[1]:
         time.sleep(0.1)
+
+def turn_motors(on):
+    if steppers_en != None:
+        steppers_en.value = 1 if not on else 0
+        stepper_move_flag = on
+
+turn_off_motors = lambda : turn_motors(on=False)
+turn_on_motors  = lambda : turn_motors(on=True)
+
+
+#async func
+async def should_i_turn_off_motors():
+    diff = [calc_photo_diff(pair) for pair in (('LU', 'RU'), ('LB','RB'), 'LU', 'LB'), ('RU','RB'))]
+    if all([i<=1 for i in diff]):
+        turn_off_motors()
+        period = 10*60*1000 #10 min
+        t = Timer()
+        t.init(mode=Timer.ONE_SHOT, period=period, callback=motor_on_after_period)
+        timers['motors_sleep'] = t
+
+        await uasyncio.sleep_ms(period)
+    await uasyncio.sleep_ms(500)
 
 
 #program
@@ -111,7 +139,6 @@ def setup():
     #btn.add_on_press(Event(switch_move_flag))
     #btn.add_on_relase(Event(callback, "relase"))
     #btn.add_on_series(2, Event(callback, "double click"))
-    btn.add_on_series(2, Event(switch_move_flag))
     btn.add_after_long_press(5, Event(close))
     for b in stoppers:
         b.add_on_press(Event(close))
@@ -120,9 +147,14 @@ def setup():
      
 last_dir = -1
 def loop():
+    return uasyncio.run(async_loop())
+
+async def async_loop():
     dprint("loop")
+
     btn.check()
-    
+
+    await should_i_turn_off_motors()
     motor_loop()
     
     
