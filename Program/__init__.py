@@ -8,7 +8,7 @@ from .button import Button, Better_Button
 from .event import Event
 from .util import dprint
 from .settings import DEBUG
-import uasincio 
+import uasyncio 
 #from .web_server import *
 
 #GPIO
@@ -36,7 +36,7 @@ motor_type = types_of_motor[0]
 #objects
 photo = {}
 motors = {}
-timers = {}}
+timers = {}
 
 btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
 stoppers = (Button(pin=pin, pull = Pin.PULL_DOWN) for pin in stops)
@@ -94,19 +94,29 @@ def turn_motors(on):
 turn_off_motors = lambda : turn_motors(on=False)
 turn_on_motors  = lambda : turn_motors(on=True)
 
+def is_panel_centered():
+    diff = [calc_photo_diff(pair) for pair in (('LU', 'RU'), ('LB','RB'), ('LU', 'LB'), ('RU','RB'))]
+    return all([i<=1 for i in diff])
+
 
 #async func
 async def should_i_turn_off_motors():
-    diff = [calc_photo_diff(pair) for pair in (('LU', 'RU'), ('LB','RB'), 'LU', 'LB'), ('RU','RB'))]
-    if all([i<=1 for i in diff]):
-        turn_off_motors()
-        period = 10*60*1000 #10 min
-        t = Timer()
-        t.init(mode=Timer.ONE_SHOT, period=period, callback=motor_on_after_period)
-        timers['motors_sleep'] = t
+    while True:
+        if not stepper_move_flag:
+            await uasyncio.sleep(5)
+            continue
 
-        await uasyncio.sleep_ms(period)
-    await uasyncio.sleep_ms(500)
+        if is_panel_centered():
+            await uasyncio.sleep_ms(500)
+        if is_panel_centered(): # sprawdza czy przez 0.5 min jest dobrze wyśrodkowane
+            turn_off_motors()
+            period = 30 *60*1000 #x min
+            t = Timer()
+            t.init(mode=Timer.ONE_SHOT, period=period, callback=motor_on_after_period)
+            timers['motors_sleep'] = t
+
+            await uasyncio.sleep_ms(period)
+        await uasyncio.sleep_ms(500)
 
 
 #program
@@ -150,18 +160,22 @@ def loop():
     return uasyncio.run(async_loop())
 
 async def async_loop():
-    dprint("loop")
+    for m in motors:
+        uasyncio.create_task(m.async_update_loop())
+    uasyncio.create_task(should_i_turn_off_motors())
+    while True:
+        dprint("loop")
 
-    btn.check()
+        btn.check()
 
-    await should_i_turn_off_motors()
-    motor_loop()
-    
-    
-    if DEBUG:
-        time.sleep(0.2)
-    if finish_flag:
-        return 1
+        motor_loop()
+        
+        
+        if DEBUG:
+            time.sleep(0.2)
+        if finish_flag:
+            return 1
+        await uasyncio.sleep_ms(10)
     
 
 def fin():

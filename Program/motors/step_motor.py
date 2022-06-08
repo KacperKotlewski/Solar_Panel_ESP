@@ -3,6 +3,7 @@ from machine import Pin, PWM
 import time
 from ..timers import Timer, Time_calculations
 from ..util import dprint
+import uasyncio
 
 class Stepper(Motor):
     _GPIO_step = None
@@ -20,6 +21,7 @@ class Stepper(Motor):
         self.last_step_time = Timer()
         self.speed_in_Hz = speed_in_Hz
         self._last_step_value = 0
+        self._async_run = False
         
         self._setup_pin()
         
@@ -44,26 +46,32 @@ class Stepper(Motor):
     def _continue_step(self):
         if self.is_busy() and self._update_time():
             dprint("_continue_step","condition True")
-            is_minus = self._steps_to_make < 0
-            prefix = -1 if is_minus else 1
-            dprint("_continue_step","prefix",prefix)
-            self._steps += prefix*1
-            self._steps_to_make -= prefix*1
-            dprint("_continue_step","_steps",self._steps)
-            dprint("_continue_step","_steps_to_make",self._steps_to_make)
-            dprint("_continue_step","abs(self._steps) >= abs(self._steps_to_make)",abs(self._steps) >= abs(self._steps_to_make))
-            if abs(self._steps_to_make):
-                self._p_dir.value(1 if is_minus else 0)
-                self._last_step_value = 0 if self._last_step_value == 1 else 1
-                self._p_step.value(self._last_step_value)
-                dprint("_continue_step","_p_dir",self._p_dir.value())
-                dprint("_continue_step","_last_step_value",self._last_step_value)
-                dprint("_continue_step","_p_step",self._p_step.value())
+            self._make_a_step()
+
+    def _make_a_step(self):
+        is_minus = self._steps_to_make < 0
+        prefix = -1 if is_minus else 1
+        self._steps += prefix*1
+        self._steps_to_make -= prefix*1
+
+        dprint( "_continue_step","prefix",prefix,
+                "_continue_step","_steps",self._steps,
+                "_continue_step","_steps_to_make",self._steps_to_make,
+                "_continue_step","abs(self._steps) >= abs(self._steps_to_make)",abs(self._steps) >= abs(self._steps_to_make))
+        
+        if abs(self._steps_to_make):
+            self._p_dir.value(1 if is_minus else 0)
+            self._last_step_value = 0 if self._last_step_value == 1 else 1
+            self._p_step.value(self._last_step_value)
+            
+            dprint( "_continue_step","_p_dir",self._p_dir.value(),
+                    "_continue_step","_last_step_value",self._last_step_value,
+                    "_continue_step","_p_step",self._p_step.value())
             
     def _update_time(self):
-        dprint("_update_time","self.last_step_time.get_time().ms()",self.last_step_time.get_time().ms())
-        dprint("_update_time","1/self.speed_in_Hz",1000/self.speed_in_Hz)
-        dprint("_update_time","self.last_step_time.get_time().ms() > 1/self.speed_in_Hz",self.last_step_time.get_time().ms() > 1000/self.speed_in_Hz)
+        dprint("_update_time","self.last_step_time.get_time().ms()",self.last_step_time.get_time().ms(),
+                "_update_time","1/self.speed_in_Hz",1000/self.speed_in_Hz,
+                "_update_time","self.last_step_time.get_time().ms() > 1/self.speed_in_Hz",self.last_step_time.get_time().ms() > 1000/self.speed_in_Hz)
         if self.last_step_time.get_time().ms() > 1000/self.speed_in_Hz:
             self.last_step_time.reset()
             return True
@@ -75,6 +83,21 @@ class Stepper(Motor):
             self._continue_step()
             
     def stop(self):
+        pass
+
+    def reset_pos(self):
         if self._steps != 0:
             self.step(-self._steps)
             self.update()
+    
+    def stop_async(self):
+        self._async_run = False
+
+    async def async_update_loop(self):
+        self._async_run = True
+        while self._async_run == True:
+            if self.is_busy():
+                self._make_a_step()
+                await uasyncio.sleep_ms(1000/self.speed_in_Hz)
+            else:
+                await uasyncio.sleep(1)
