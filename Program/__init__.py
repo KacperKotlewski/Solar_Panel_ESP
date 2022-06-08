@@ -73,18 +73,20 @@ def move_to_light(motor, pair_of_photo, dire=1):
 
 def move_motor_by_photo(motor, photoresistor_setup=(('LU', 'RU'), ('LB','RB')), direction=1):
     if motor.is_busy():
-        motor.update()
         return
     for t in photoresistor_setup:
         move_to_light(motor, t, direction)
             
-def motor_loop():
-    if stepper_move_flag == False:
-        return
-    move_motor_by_photo(motors['yaw'],   (('LU', 'RU'), ('LB','RB')), direction=-1)
-    move_motor_by_photo(motors['pitch'], (('LU', 'LB'), ('RU','RB')), direction=-1)
-    if motor_type == types_of_motor[1]:
-        time.sleep(0.1)
+async def motor_loop():
+    while True:
+        if stepper_move_flag == False:
+            await uasyncio.sleep(2)
+            continue
+        move_motor_by_photo(motors['yaw'],   (('LU', 'RU'), ('LB','RB')), direction=-1)
+        move_motor_by_photo(motors['pitch'], (('LU', 'LB'), ('RU','RB')), direction=-1)
+        if motor_type == types_of_motor[1]:
+            await uasyncio.sleep(0.1)
+        await uasyncio.sleep_ms(50)
 
 def turn_motors(on):
     if steppers_en != None:
@@ -163,12 +165,11 @@ async def async_loop():
     for m in motors:
         uasyncio.create_task(m.async_update_loop())
     uasyncio.create_task(should_i_turn_off_motors())
+    uasyncio.create_task(motor_loop())
     while True:
         dprint("loop")
 
         btn.check()
-
-        motor_loop()
         
         
         if DEBUG:
