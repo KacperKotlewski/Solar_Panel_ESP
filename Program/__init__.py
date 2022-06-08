@@ -159,6 +159,7 @@ def setup():
      
 last_dir = -1
 def loop():
+    dprint("loop")
     return uasyncio.run(async_loop())
 
 async def async_loop():
@@ -167,7 +168,6 @@ async def async_loop():
     uasyncio.create_task(should_i_turn_off_motors())
     uasyncio.create_task(motor_loop())
     while True:
-        dprint("loop")
 
         btn.check()
         
@@ -181,13 +181,15 @@ async def async_loop():
 
 def fin():
     mot = [i for k,i in motors.items()]
-    true_table = [m.is_busy() for m in mot] + [True]
-    while any(true_table):
-        if DEBUG:
-            time.sleep(0.2)
-        for i in mot:
-            i.stop()
-        if any(true_table):
-            true_table = [m.is_busy() for m in mot] + [False]
+    for i in mot:
+        i.stop()
+    # true_table = [m.is_busy() for m in mot] + [True]
+    # while any(true_table):
+    #     if DEBUG:
+    #         time.sleep(0.2)
+    #     for i in mot:
+    #         i.stop()
+    #     if any(true_table):
+    #         true_table = [m.is_busy() for m in mot] + [False]
 
 
