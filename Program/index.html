@@ -6,25 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Słoneczny</title>
 
-<!-- 
-    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-    <script defer src="https://pyscript.net/alpha/pyscript.js"></script> -->
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
     
-    <script type="text/javascript">
-        function httpGet(theUrl)
-        {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-            xmlHttp.send( null );
-            return JSON.parse(xmlHttp.responseText);
-        }
-
-    </script>
     <style>
         body {
             font-size: 2em;
@@ -63,6 +49,26 @@
         <div class="d-flex flex-row"></div>
     </template>
 
+    <template id="mot-temp">
+        <div class="d-flex flex-column justify-content-center" id="t">
+            <div class="position-relative d-flex flex-row justify-content-center">
+                <i class = "icon ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" fill="currentColor" class="bi bi-device-hdd" viewBox="0 0 16 16">
+                        <path d="M12 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm0 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm-7.5.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1ZM5 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM8 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+                        <path d="M12 7a4 4 0 0 1-3.937 4c-.537.813-1.02 1.515-1.181 1.677a1.102 1.102 0 0 1-1.56-1.559c.1-.098.396-.314.795-.588A4 4 0 0 1 8 3a4 4 0 0 1 4 4Zm-1 0a3 3 0 1 0-3.891 2.865c.667-.44 1.396-.91 1.955-1.268.224-.144.483.115.34.34l-.62.96A3.001 3.001 0 0 0 11 7Z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4Z"/>
+                    </svg>
+                </i>
+                <i class="icon position-absolute col align-self-start" style="top:10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="currentColor" id="spinner" class="bi bi-gear-fill" viewBox="0 0 16 16">
+                        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                    </svg>
+                </i>
+            </div>
+            <span class="align-self-center"></span>
+        </div>
+    </template>
+
 
     <div class="container">
         <div class="row">
@@ -77,107 +83,59 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                            
-                        <div class="container">
-                            <div class="d-flex flex-row justify-content-between">
-                                <div>
-                                    <div class="" id="photoresistor-cont" style="border-radius: 5px; border: 2px solid #73AD21;">
+                    
+                <div class="container">
+                    <div class="d-flex flex-row justify-content-between">
+                        <div class="" id="photoresistor-cont"></div>
 
-                                    </div>
-                                </div>
+                        <div id="battery" class="d-flex flex-row">
+                            <div class="position-relative d-flex flex-row justify-content-center">
+                                <i class="icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="4em" height="4em" fill="currentColor" class="bi bi-battery" viewBox="0 0 16 16">
+                                        <path d="M0 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6zm2-1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H2zm14 3a1.5 1.5 0 0 1-1.5 1.5v-3A1.5 1.5 0 0 1 16 8z"/>
+                                    </svg>
+                                </i>
 
-                                <div id="battery">
-                                    <div class="d-flex flex-row">
-                                        <div>
-                                            <div class="position-relative d-flex flex-row justify-content-center">
-                                                <i class="icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="4em" height="4em" fill="currentColor" class="bi bi-battery" viewBox="0 0 16 16">
-                                                        <path d="M0 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6zm2-1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H2zm14 3a1.5 1.5 0 0 1-1.5 1.5v-3A1.5 1.5 0 0 1 16 8z"/>
-                                                    </svg>
-                                                </i>
-
-                                                <span class="position-absolute col align-self-center">
-                                                    <span id="battery-power">0</span>%
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <i class="icon power  align-self-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" fill="currentColor" class="bi bi-lightning-fill" id="battery-status" viewBox="0 0 16 16">
-                                                <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z"/>
-                                            </svg>
-                                        </i>
-                                    </div>
-                                </div>
+                                <span class="position-absolute col align-self-center">
+                                    <span id="battery-power">0</span>%
+                                </span>
                             </div>
-                            <div class="d-flex flex-row pt-5 justify-content-between">
+                            <i class="icon power  align-self-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" fill="currentColor" class="bi bi-lightning-fill" id="battery-status" viewBox="0 0 16 16">
+                                    <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z"/>
+                                </svg>
+                            </i>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row pt-5 justify-content-between">
 
 
-                                <div id="motors" class="d-flex flex-row">
-
-                                    <div class="d-flex flex-column justify-content-center" id="pitch">
-                                        <div class="position-relative d-flex flex-row justify-content-center">
-                                            <i class = "icon ">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" fill="currentColor" class="bi bi-device-hdd" viewBox="0 0 16 16">
-                                                    <path d="M12 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm0 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm-7.5.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1ZM5 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM8 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
-                                                    <path d="M12 7a4 4 0 0 1-3.937 4c-.537.813-1.02 1.515-1.181 1.677a1.102 1.102 0 0 1-1.56-1.559c.1-.098.396-.314.795-.588A4 4 0 0 1 8 3a4 4 0 0 1 4 4Zm-1 0a3 3 0 1 0-3.891 2.865c.667-.44 1.396-.91 1.955-1.268.224-.144.483.115.34.34l-.62.96A3.001 3.001 0 0 0 11 7Z"/>
-                                                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4Z"/>
-                                                </svg>
-                                            </i>
-                                            <i class="icon position-absolute col align-self-start" style="top:10px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="currentColor" id="spinner" class="bi bi-gear-fill" viewBox="0 0 16 16">
-                                                    <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-                                                </svg>
-                                            </i>
-                                        </div>
-                                        <span class="align-self-center">pitch</span>
-                                    </div>
-
-                                    <div class="d-flex flex-column justify-content-center" id="yaw">
-                                        <div class="position-relative d-flex flex-row justify-content-center">
-                                            <i class = "icon ">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" fill="currentColor" class="bi bi-device-hdd" viewBox="0 0 16 16">
-                                                    <path d="M12 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm0 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Zm-7.5.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1ZM5 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM8 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
-                                                    <path d="M12 7a4 4 0 0 1-3.937 4c-.537.813-1.02 1.515-1.181 1.677a1.102 1.102 0 0 1-1.56-1.559c.1-.098.396-.314.795-.588A4 4 0 0 1 8 3a4 4 0 0 1 4 4Zm-1 0a3 3 0 1 0-3.891 2.865c.667-.44 1.396-.91 1.955-1.268.224-.144.483.115.34.34l-.62.96A3.001 3.001 0 0 0 11 7Z"/>
-                                                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2Zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H4Z"/>
-                                                </svg>
-                                            </i>
-                                            <i class="icon position-absolute col align-self-start" style="top:10px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" fill="currentColor" id="spinner" class="bi bi-gear-fill" viewBox="0 0 16 16">
-                                                    <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-                                                </svg>
-                                            </i>
-                                        </div>
-                                        <span class="align-self-center">yaw</span>
-                                    </div>
-
-                                </div>
-
-
-                                <div id="panel" class="d-flex flex-row">
-
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <div class="">
-                                            <i class = "icon ">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" fill="currentColor" class="bi bi-sunset" viewBox="0 0 16 16">
-                                                    <path d="M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708l-.646.647V1.5a.5.5 0 0 0-1 0v1.793l-.646-.647a.5.5 0 1 0-.708.708l1.5 1.5zm-5.303-.51a.5.5 0 0 1 .707 0l1.414 1.413a.5.5 0 0 1-.707.707L2.343 5.05a.5.5 0 0 1 0-.707zm11.314 0a.5.5 0 0 1 0 .706l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zM8 7a3 3 0 0 1 2.599 4.5H5.4A3 3 0 0 1 8 7zm3.71 4.5a4 4 0 1 0-7.418 0H.499a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1h-3.79zM0 10a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 0 10zm13 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
-                                                </svg>
-                                            </i>
-                                        </div>
-                                        <span class="align-self-center"><span id="panel-power">0</span>V</span>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
+                        <div id="motors" class="d-flex flex-row">
 
                         </div>
-                        
+
+
+                        <div id="panel" class="d-flex flex-row">
+
+                            <div class="d-flex flex-column justify-content-center">
+                                <div class="">
+                                    <i class = "icon ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" fill="currentColor" class="bi bi-sunset" viewBox="0 0 16 16">
+                                            <path d="M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708l-.646.647V1.5a.5.5 0 0 0-1 0v1.793l-.646-.647a.5.5 0 1 0-.708.708l1.5 1.5zm-5.303-.51a.5.5 0 0 1 .707 0l1.414 1.413a.5.5 0 0 1-.707.707L2.343 5.05a.5.5 0 0 1 0-.707zm11.314 0a.5.5 0 0 1 0 .706l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zM8 7a3 3 0 0 1 2.599 4.5H5.4A3 3 0 0 1 8 7zm3.71 4.5a4 4 0 1 0-7.418 0H.499a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1h-3.79zM0 10a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 0 10zm13 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                                        </svg>
+                                    </i>
+                                </div>
+                                <span class="align-self-center"><span id="panel-power">0</span>V</span>
+                            </div>
+
+                        </div>
+
+
                     </div>
+
+
                 </div>
+                        
             </div>
         </div>
     </div>
@@ -185,61 +143,57 @@
     <script type="text/javascript">
         var ph = [["RU","LU"],["RB","LB"]];
 
-        function value_to_color_html(value){
-            if (value < 0) { value = 0; }
-            if (value == 10) { value = "a"; }
-            else { value = value.toString(); }
-            let color = "#"+value+value+value;
-            return color;
+        function v_to_c_html(v){
+            if (v < 0) { v = 0; }
+            if (v == 10) { v = "a"; }
+            else { v = v.toString(); }
+            return "#"+v+v+v;
         }
 
-        function ajax_update(url, func){
+        function ajax_up(url, func){
             $.ajax({ 
                 type: 'GET', 
                 url: 'http://192.168.1.14/'+url, 
-                data: { get_param: 'value' }, 
                 dataType: 'json',
                 success: function (data) { 
-                    console.log(url);
-                    console.log(data);
+                    console.log(url,data);
                     func(data);
                 }
             });
         }
 
-        function update_photo(){
-            ajax_update('photoresistors', ((data) => {
-                $.each(data, function(index, element) {
-                    let value = parseInt((element)/400);
-                    color = value_to_color_html(10 - value);
-                    bgcolor = value_to_color_html(value);
-
-                    e = $('#photoresistor-cont div#ph-'+index);
-                    e.css('color',color);
-                    e.css('backgroundColor',bgcolor);
+        function up_ph(){
+            ajax_up('photoresistors', ((d) => {
+                $.each(d, function(i, val) {
+                    let v = parseInt((val)/400);
+                    c = v_to_c_html(10 - v);
+                    bgc = v_to_c_html(v);
+                    e = $('#photoresistor-cont div#ph-'+i);
+                    e.css('color',c);
+                    e.css('backgroundColor',bgc);
                 });
             }));
         }
-        function update_motors(){
-            ajax_update('motors', ((data) => {
-                $.each(data, function(index, element) {
-                    spinner = $('#motors #'+index+' #spinner');
-                    if (element == true)
+        function up_mot(){
+            ajax_up('motors', ((d) => {
+                $.each(d, function(i, v) {
+                    sp = $('#motors #'+i+' #spinner');
+                    if (v == true)
                     {
-                        spinner.addClass( "spinner" );
+                        sp.addClass("spinner");
                     }else{
-                        spinner.removeClass( "spinner" );
+                        sp.removeClass("spinner");
                     }
                 });
             }));
         }
-        function update_battery(){
-            ajax_update('battery', ((data) => {
+        function up_bat(){
+            ajax_up('battery', ((d) => {
                 e = $('#battery span#battery-power');
-                e.text(data['power']);
+                e.text(d['power']);
 
                 e = $('#battery #battery-status');
-                if (data['status'] == true)
+                if (d['status'] == true)
                 {
                     e.removeClass( "opacity-25" );
                     e.addClass( "opacity-100" );
@@ -249,46 +203,48 @@
                 }
             }));
         }
-        function update_panel(){
-            ajax_update('panel', ((data) => {
-                $.each(data, function(index, element) {
-                    e = $('span#panel-power');
-                    e.text(element);
-                });
+        function up_pan(){
+            ajax_up('panel', ((d) => {
+                e = $('span#panel-power');
+                e.text(d[0]);
             }));
         }
 
-        function create_photoresistors(){
-            let row_template = $("template#row-template");
-            let photo_template = $("template#photoresistor-template");
-            let ph_cont = $('#photoresistor-cont');
+        function cr(){
+            let row_t = $("#row-template");
+            let ph_t = $("#photoresistor-template");
+            let ph_c = $('#photoresistor-cont');
                         
             for (let i = 0; i < ph.length; i++) {
 
-                ph_cont.append(row_template.html());
-                r = ph_cont.children("div").last();
+                ph_c.append(row_t.html());
+                r = ph_c.children("div").last();
                 r.attr('id', "row-ph-"+i);
 
                 ph[i].forEach((elem) => {
-                    r.append(photo_template.html());
+                    r.append(ph_t.html());
                     p = r.children("div").last();
                     p.attr('id', "ph-"+elem);
                 });
             }
+            
+            let m_c = $('#motors');
+            let m_t = $('#mot-temp');
+            ["pitch", "yaw"].forEach((e) => {
+                m_c.append(m_t.html());
+                r = m_c.children("div#t").last();
+                r.attr('id', e);
+                r.children("span").text(e)
+            });
         }
 
-        function update()
-        {
-            update_photo();
-            update_motors();
-            update_battery();
-            update_panel();
-        }
+        function up()
+        {up_ph(); up_mot(); up_bat(); up_pan();}
 
         $(document).ready(function(){
-            create_photoresistors();
-            update();
-            var intervalId = window.setInterval(function(){ update(); }, 5000);
+            cr();
+            up();
+            var intUp = window.setInterval(function(){ up(); }, 5000);
         });
 
     </script>

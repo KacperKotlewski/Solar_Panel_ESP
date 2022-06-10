@@ -21,9 +21,6 @@ def connect():
     print('network config:', wlan.ifconfig())
     return wlan
 
-htmldoc = None
-with open("index.html","r", encoding='utf-8') as f:
-    htmldoc ="".join(f.readlines())
 
 app = Microdot()
 
@@ -37,7 +34,7 @@ def func(request, response):
     
 @app.route('/')
 async def index(request):
-    return Response(body=htmldoc, headers={"Content-Type": "text/html"})
+    return Response.send_file('index.html')
 
 @app.route("/get_debug", methods=["GET"])
 async def get(request):
@@ -46,15 +43,3 @@ async def get(request):
     print("body",request.body)
     print("json",request.json)
     return Response(["test"])
-
-
-
-
-
-#@app.route('/shutdown')
-#async def shutdown(request):
-    #request.app.shutdown()
-    #from . import finish_flag
-    #finish_flag = True
-    #return 'The server is shutting down...'
-
