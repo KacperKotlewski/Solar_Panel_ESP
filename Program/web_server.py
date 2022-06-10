@@ -1,7 +1,8 @@
 from .settings import ssid, passwd
 import network
 import uasyncio
-from microdot_asyncio import Microdot
+from microdot_asyncio import Microdot, Response
+from .settings import DEBUG
 
 
 def scan():
@@ -20,16 +21,34 @@ def connect():
     print('network config:', wlan.ifconfig())
     return wlan
 
+htmldoc = None
+with open("index.html","r", encoding='utf-8') as f:
+    htmldoc ="".join(f.readlines())
 
 app = Microdot()
 
 async def start_server():
     wlan = connect()
-    await app.start_server(debug=True, port=80)
+    await app.start_server(debug=DEBUG, port=80)
+    
+@app.after_request
+def func(request, response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
     
 @app.route('/')
 async def index(request):
-    return "Hello World"
+    return Response(body=htmldoc, headers={"Content-Type": "text/html"})
+
+@app.route("/get_debug", methods=["GET"])
+async def get(request):
+    print("headers",request.headers)
+    print("args",request.args)
+    print("body",request.body)
+    print("json",request.json)
+    return Response(["test"])
+
+
+
 
 
 #@app.route('/shutdown')

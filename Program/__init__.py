@@ -123,6 +123,24 @@ async def should_i_turn_off_motors():
         await uasyncio.sleep_ms(500)
 
 
+@app.route("/photoresistors", methods=["GET"])
+async def API_ph(request):
+    return Response({k:o.read() for k,o in photo.items()})
+
+@app.route("/motors", methods=["GET"])
+async def API_motor_move(request):
+    return Response({k:o.is_busy() for k,o in motors.items()})
+
+@app.route("/battery", methods=["GET"])
+async def API_battery(request):
+    return Response({"power":94.2, "status":False})
+
+@app.route("/panel", methods=["GET"])
+async def API_panel(request):
+    return Response([12.2])
+
+
+
 #program
 def setup():
     if DEBUG:
