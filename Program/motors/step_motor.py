@@ -98,6 +98,6 @@ class Stepper(Motor):
         while self._async_run == True:
             if self.is_busy():
                 self._make_a_step()
-                await uasyncio.sleep_ms(1000/self.speed_in_Hz)
+                await uasyncio.sleep_ms(1000//self.speed_in_Hz)
             else:
                 await uasyncio.sleep(1)

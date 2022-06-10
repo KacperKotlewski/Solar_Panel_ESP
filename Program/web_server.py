@@ -20,19 +20,22 @@ def connect():
     print('network config:', wlan.ifconfig())
     return wlan
 
+
 app = Microdot()
 
-def start_server():
-    print("start server")
-    connect()
-        
+async def start_server():
+    wlan = connect()
+    await app.start_server(debug=True, port=80)
+    
 @app.route('/')
 async def index(request):
     return "Hello World"
 
 
-@app.route('/shutdown')
-async def shutdown(request):
-    request.app.shutdown()
-    return 'The server is shutting down...'
+#@app.route('/shutdown')
+#async def shutdown(request):
+    #request.app.shutdown()
+    #from . import finish_flag
+    #finish_flag = True
+    #return 'The server is shutting down...'
 

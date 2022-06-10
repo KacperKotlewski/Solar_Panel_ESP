@@ -9,7 +9,7 @@ from .event import Event
 from .util import dprint
 from .settings import DEBUG
 import uasyncio 
-#from .web_server import *
+from .web_server import *
 
 #GPIO
 #photo_gpio = (34,35,32,33)
@@ -90,14 +90,16 @@ async def motor_loop():
 
 def turn_motors(on):
     if steppers_en != None:
-        steppers_en.value = 1 if not on else 0
+        steppers_en.value( 1 if not on else 0)
         stepper_move_flag = on
 
 turn_off_motors = lambda : turn_motors(on=False)
 turn_on_motors  = lambda : turn_motors(on=True)
 
 def is_panel_centered():
-    diff = [calc_photo_diff(pair) for pair in (('LU', 'RU'), ('LB','RB'), ('LU', 'LB'), ('RU','RB'))]
+    pairs = (('LU', 'RU'), ('LB','RB'), ('LU', 'LB'), ('RU','RB'))
+    reads = [ [photo[i].read() for i in pair] for pair in  pairs]
+    diff = [calc_photo_diff(pair[0], pair[1]) for pair in reads]
     return all([i<=1 for i in diff])
 
 
@@ -163,10 +165,11 @@ def loop():
     return uasyncio.run(async_loop())
 
 async def async_loop():
-    for m in motors:
+    for k,m in motors.items():
         uasyncio.create_task(m.async_update_loop())
     uasyncio.create_task(should_i_turn_off_motors())
     uasyncio.create_task(motor_loop())
+    uasyncio.create_task(start_server())
     while True:
 
         btn.check()
@@ -191,5 +194,6 @@ def fin():
     #         i.stop()
     #     if any(true_table):
     #         true_table = [m.is_busy() for m in mot] + [False]
+
 
 
