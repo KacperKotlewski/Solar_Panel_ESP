@@ -153,7 +153,7 @@
         function ajax_up(url, func){
             $.ajax({ 
                 type: 'GET', 
-                url: 'http://192.168.1.14/'+url, 
+                url: 'http://localhost/'+url, 
                 dataType: 'json',
                 success: function (data) { 
                     console.log(url,data);

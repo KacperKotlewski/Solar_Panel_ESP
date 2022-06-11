@@ -3,6 +3,7 @@ import esp
 from machine import Pin, ADC, Timer
 import time
 from .motors import Servo, Stepper
+from .analog import Analog
 from .photoresistor import Photoresistor
 from .button import Button, Better_Button
 from .event import Event
@@ -22,6 +23,9 @@ motors_step_gpio = {'yaw':(21,19), 'pitch':(18,5)} #yaw is rotate left and right
 stepers_enable = 23
 
 stops = (12,14,27,26)
+battery_pin = 15
+solar_pin = 0
+
 
 #varibles
 duty_ranges = {'yaw':(40,120), 'pitch':(30,80)} #for servos
@@ -40,6 +44,8 @@ timers = {}
 
 btn = Better_Button(pin=setup_btn_gpio, pull = Pin.PULL_UP)
 stoppers = (Button(pin=pin, pull = Pin.PULL_DOWN) for pin in stops)
+bat = Analog(pin=battery_pin)
+sol = Analog(pin=solar_pin)
 
 if motor_type == types_of_motor[0]:
     steppers_en = Pin(stepers_enable, mode=Pin.OUT)
@@ -121,7 +127,24 @@ async def should_i_turn_off_motors():
 
             await uasyncio.sleep_ms(period)
         await uasyncio.sleep_ms(500)
+        
 
+        
+def charging_status():
+    return False
+        
+def v_div(v,ro, r1=10000):
+    return (v*ro)/(ro+r1)
+
+def read_battery_status():
+    value = v_div(bat.read(), 3300)  /12.4*100
+    return round(value, 1)
+
+def read_solar_status():
+    value = v_div(bat.read(), 2100)
+    return round(value, 1)
+    
+    
 
 @app.route("/photoresistors", methods=["GET"])
 async def API_ph(request):
@@ -133,11 +156,11 @@ async def API_motor_move(request):
 
 @app.route("/battery", methods=["GET"])
 async def API_battery(request):
-    return Response({"power":94.2, "status":False})
+    return Response({"power":read_battery_status(), "status":charging_status()})
 
 @app.route("/panel", methods=["GET"])
 async def API_panel(request):
-    return Response([12.2])
+    return Response([read_solar_status()])
 
 
 
